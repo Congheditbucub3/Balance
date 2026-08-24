@@ -1,0 +1,304 @@
+/* theme.css — shared design system for Balance.
+   Sporty energy (lime/blue accents, bold headline type) kept in check by a
+   minimal, high-whitespace dark surface — inspired by the padel/tennis club
+   references (bold color + motion) balanced against a plainer minimal site
+   (restraint, generous space, few competing elements per screen). */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* surfaces */
+  --bg: #0b0b0e;
+  --surface: #17171d;
+  --surface-2: #1f1f27;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.18);
+
+  /* text */
+  --text: #f5f5f7;
+  --text-muted: #9a9aa6;
+  --text-faint: #63636d;
+
+  /* accents — lime is the primary "sporty" accent, blue is secondary /
+     teacher-role / informational, red is reserved for late/error states */
+  --lime: #d6ff3f;
+  --lime-dim: rgba(214, 255, 63, 0.14);
+  --lime-ink: #0b0b0e; /* text color used ON TOP of lime */
+  --blue: #4c8dff;
+  --blue-dim: rgba(76, 141, 255, 0.14);
+  --red: #ff6b6b;
+  --red-dim: rgba(255, 107, 107, 0.14);
+
+  /* shape */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  /* type */
+  --font-heading: 'Outfit', -apple-system, sans-serif;
+  --font-body: 'Inter', -apple-system, sans-serif;
+
+  --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.35);
+  --shadow-glow-lime: 0 8px 24px rgba(214, 255, 63, 0.25);
+  --shadow-glow-blue: 0 8px 24px rgba(76, 141, 255, 0.25);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+a { color: inherit; }
+
+/* --- layout ------------------------------------------------------------ */
+.container {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.text-muted { color: var(--text-muted); }
+
+/* --- dot-grid brand mark ------------------------------------------------
+   Small reusable logo motif (echoes the dotted-grid marks in the padel/
+   tennis references) — three rows of three dots. */
+.dot-logo {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 3px);
+  grid-template-rows: repeat(3, 3px);
+  gap: 2px;
+  vertical-align: middle;
+}
+.dot-logo span {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--lime);
+}
+
+/* --- buttons ------------------------------------------------------------ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 26px;
+  border-radius: var(--radius-pill);
+  border: none;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  text-decoration: none;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+
+.btn-primary { background: var(--lime); color: var(--lime-ink); }
+.btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--shadow-glow-lime); }
+
+.btn-blue { background: var(--blue); color: #fff; }
+.btn-blue:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--shadow-glow-blue); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text);
+  border: 1.5px solid var(--border-strong);
+}
+.btn-ghost:hover:not(:disabled) { border-color: var(--lime); color: var(--lime); }
+
+.btn-danger { background: var(--red-dim); color: var(--red); }
+
+.btn-block { width: 100%; }
+
+/* --- cards ---------------------------------------------------------------*/
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+.card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.card-link:hover { transform: translateY(-3px); border-color: var(--border-strong); }
+
+/* --- pills / status badges ------------------------------------------------*/
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.pill-lime { background: var(--lime-dim); color: var(--lime); }
+.pill-blue { background: var(--blue-dim); color: var(--blue); }
+.pill-red { background: var(--red-dim); color: var(--red); }
+.pill-neutral { background: var(--surface-2); color: var(--text-muted); }
+
+/* --- form fields -----------------------------------------------------------*/
+.field { text-align: left; margin-bottom: 16px; }
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.input-field {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 13px 16px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.input-field:focus {
+  outline: none;
+  border-color: var(--lime);
+  box-shadow: 0 0 0 3px var(--lime-dim);
+}
+.input-field::placeholder { color: var(--text-faint); }
+
+.form-error {
+  color: var(--red);
+  font-size: 13px;
+  text-align: left;
+  margin: -6px 0 14px;
+  display: none;
+}
+
+/* --- progress bars ---------------------------------------------------------*/
+.progress-track {
+  width: 100%;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--lime);
+  border-radius: var(--radius-pill);
+  transition: width 0.4s ease;
+}
+.progress-fill.blue { background: var(--blue); }
+
+/* --- stat tiles (dashboard) -------------------------------------------------*/
+.stat-tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+.stat-tile .stat-number {
+  font-family: var(--font-heading);
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: var(--lime);
+  line-height: 1;
+}
+.stat-tile .stat-number.blue { color: var(--blue); }
+.stat-tile .stat-label {
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* --- top nav (rendered by app.js) ------------------------------------------*/
+.balance-nav {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: rgba(23, 23, 29, 0.75);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text);
+}
+.balance-nav .brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--text);
+  font-size: 15px;
+}
+.balance-nav .name { color: var(--text-muted); margin-left: 4px; }
+.balance-nav .right { display: flex; align-items: center; gap: 12px; }
+.balance-nav .credit-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--lime-dim);
+  color: var(--lime);
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+}
+.balance-nav .logout-btn {
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.balance-nav .logout-btn:hover { color: var(--text); }
+.balance-nav .offline-flag { color: #e0a030; font-size: 12px; margin-left: 8px; }
+
+body.has-balance-nav { padding-top: 76px; }
+
+@media (max-width: 640px) {
+  .balance-nav .name-role { display: none; }
+}

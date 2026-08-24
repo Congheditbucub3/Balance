@@ -1,0 +1,144 @@
+/* steptracker.css — page-specific styles; shared tokens come from theme.css */
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 90px 20px 40px;
+}
+
+.container { text-align: center; max-width: 340px; }
+
+.container h1 {
+    font-size: 1.5rem;
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+}
+
+.container .eyebrow { display: block; margin-bottom: 6px; }
+
+/* --- The Progress Ring Styling --- */
+.progress-container {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    margin: 28px auto;
+}
+
+svg {
+    /* Rotates the circle so it starts filling from the top */
+    transform: rotate(-90deg);
+}
+
+circle {
+    fill: transparent;
+    stroke-width: 15;
+    stroke-linecap: round;
+}
+
+.ring-background {
+    stroke: var(--surface-2);
+}
+
+.ring-fill {
+    stroke: var(--lime);
+    stroke-dasharray: 691; /* The total circumference of the circle */
+    stroke-dashoffset: 691; /* Pushes the color off-screen to start at 0% */
+    transition: stroke-dashoffset 0.3s ease; /* This creates the smooth CSS animation */
+}
+
+/* --- Text and Buttons --- */
+.step-display {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+}
+
+#stepCount {
+    font-family: var(--font-heading);
+    font-size: 3.2rem;
+    font-weight: 800;
+    color: var(--lime);
+    line-height: 1;
+}
+
+.label {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+#startBtn {
+    background: var(--lime);
+    color: var(--lime-ink);
+    border: none;
+    padding: 16px 40px;
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    font-weight: 700;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
+    width: 100%;
+}
+
+#startBtn:hover { transform: translateY(-2px); box-shadow: var(--shadow-glow-lime); }
+#startBtn:active { transform: scale(0.97); }
+
+/* JS adds this class when tracking starts */
+#startBtn.is-tracking {
+    background: var(--red);
+    color: #fff;
+    box-shadow: none;
+}
+
+#statusMsg {
+    margin-top: 18px;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+}
+
+#creditMsg {
+    margin-top: 10px;
+    color: var(--lime);
+    font-size: 0.9rem;
+    font-weight: 600;
+    min-height: 1.2em;
+}
+
+#pendingMsg {
+    margin-top: 6px;
+    color: #e0a030;
+    font-size: 0.78rem;
+    min-height: 1.1em;
+}
+
+#demoBtn {
+    margin-top: 18px;
+    width: 100%;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    border: 1.5px solid var(--border);
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease;
+}
+#demoBtn:hover { border-color: var(--lime); color: var(--lime); }
+
+.back-link {
+    display: inline-block;
+    margin-top: 26px;
+    color: var(--text-faint);
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+.back-link:hover { color: var(--text-muted); }

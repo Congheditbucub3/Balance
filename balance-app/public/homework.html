@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Homework Hub - Balance</title>
+<link rel="stylesheet" href="theme.css">
+<style>
+  body { padding: 100px 0 60px; }
+  .page-header { margin-bottom: 24px; }
+  .page-header h1 { font-size: 1.8rem; margin-top: 6px; }
+
+  .assignment-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 22px;
+    margin-bottom: 14px;
+  }
+  .assignment-card .a-title { font-family: var(--font-heading); font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .assignment-card .a-meta { font-size: 0.82rem; color: var(--text-faint); margin: 6px 0 14px; }
+
+  form.new-assignment {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    margin-bottom: 28px;
+  }
+  form.new-assignment .field-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; align-items: end; }
+  @media (max-width: 620px) { form.new-assignment .field-row { grid-template-columns: 1fr; } }
+
+  .sub-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.85rem; padding: 10px 0; border-top: 1px solid var(--border);
+  }
+  .sub-row select {
+    background: var(--surface-2); color: var(--text); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 6px 10px; font-size: 0.8rem;
+  }
+  .empty-msg { color: var(--text-faint); font-size: 0.9rem; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="page-header">
+      <span class="eyebrow">Homework Hub</span>
+      <h1>📚 Assignments</h1>
+    </div>
+
+    <div id="teacherForm"></div>
+    <div id="assignmentList">Loading…</div>
+
+    <a href="dashboard.html" class="back-link" style="display:inline-block;margin-top:20px;color:var(--text-faint);text-decoration:none;font-size:0.85rem;">&larr; Back to dashboard</a>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="homework.js"></script>
+</body>
+</html>

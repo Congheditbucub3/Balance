@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Timer - Balance</title>
+    <link rel="stylesheet" href="theme.css">
+    <link rel="stylesheet" href="timer.css">
+</head>
+<body>
+    <div class="container">
+        <span class="eyebrow">Focus Timer</span>
+        <h1 class="title">Balance Timer</h1>
+        <hr class="divider">
+
+        <div class="timer">
+            <div class="time-unit">
+                <input type="number" id="hours" placeholder="00" min="0" max="99" inputmode="numeric" data-max="99">
+                <span class="time-label">Hours</span>
+            </div>
+            <span class="colon">:</span>
+            <div class="time-unit">
+                <input type="number" id="minutes" placeholder="00" min="0" max="59" inputmode="numeric" data-max="59">
+                <span class="time-label">Minutes</span>
+            </div>
+            <span class="colon">:</span>
+            <div class="time-unit">
+                <input type="number" id="seconds" placeholder="00" min="0" max="59" inputmode="numeric" data-max="59">
+                <span class="time-label">Seconds</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="start" class="btn">Start</button>
+            <button id="pause" class="btn">Pause</button>
+            <button id="reset" class="btn">Reset</button>
+        </div>
+
+        <p id="timerCreditMsg"></p>
+        <a href="dashboard.html" class="back-link">&larr; Back to dashboard</a>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="timer.js"></script>
+</body>
+</html>
