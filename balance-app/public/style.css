@@ -218,3 +218,22 @@ body::before {
   margin-top: 6px;
   color: var(--text-faint);
 }
+
+.select-field {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  color: var(--text);
+  font-family: var(--font-body);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.select-field:focus {
+  border-color: var(--lime);
+  box-shadow: 0 0 0 3px var(--lime-dim);
+}
+.select-field option { background: var(--surface-2); color: var(--text); }

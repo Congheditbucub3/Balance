@@ -110,6 +110,52 @@ it in the "Your progress" stat tiles. Nothing here is per-day — it's a
 running total since the account was created, which is what "track their
 studying progress" means for a dashboard rather than a daily snapshot.
 
+## Sidebar, Profile, Shop, and classes (done)
+
+**Sidebar.** A slide-out drawer (`.sidebar` / `.sidebar-backdrop` in
+`theme.css`) with three links — Home, Profile, Shop — opened via the ☰
+button that's now in every page's top nav (it's built once in
+`app.js::renderSidebar()`, so every page that already includes `app.js`
+gets it for free, no per-page wiring). The "pop" animation is a small
+staggered CSS keyframe (`@keyframes sidebarPop`) — each link fades and
+scales in slightly after the drawer slides open, each one a little later
+than the last, rather than everything just appearing at once.
+
+**Classes.** New `classes` table, seeded with five starter classes
+(`10A`/`10B`/`11A`/`11B`/`12A`) on first run — add more directly in the
+database if your school uses different names. Registration now includes
+a class dropdown (populated live from `GET /api/classes`, so it never
+goes stale relative to what's actually in the database); the chosen
+`class_id` is stored on the account and shown everywhere via `/api/me`
+and `/api/profile`. Login itself doesn't ask for a class — that's set once
+at registration, not something you'd re-pick every time you log in.
+
+**Profile.** `GET /api/profile` — for a student, the headline number is
+`lifetime_earned`: a wallet column that only ever goes up, tracked
+separately from `balance` (spendable, wiped by purchases) and
+`daily_earned_credits` (resets daily). For a teacher, it shows the class
+they manage and how many students are in it. One honest limitation: for
+any wallet that existed before this feature shipped, `lifetime_earned`
+starts at 0 — there's no way to retroactively reconstruct history that
+was never tracked, so on an upgraded (not fresh) install, "total since
+the beginning" really means "total since this feature was added."
+
+**Shop.** Fixed catalog lives server-side in `lib/shop.js`
+(Pencil–20, Pencil Case–50, Pen–25) so `/api/shop/buy` always charges
+the real price regardless of what a client sends. Purchases only ever
+deduct `balance`, never `lifetime_earned` — spending doesn't erase
+credit for having earned it. Teachers can view the shop (catalog +
+class progress) but the buy button is hidden for them, and the buy
+endpoint itself rejects non-students regardless of what the UI shows.
+
+**The pizza-party bar.** Every time `awardCredits()` actually grants
+credits (steps, focus sessions, homework, night log-off), it also adds
+that amount to `class_monthly_credits` for the student's class and the
+current month — a running class-wide total, capped for display at the
+500-credit goal, that resets naturally each new month since it's keyed
+by `(class_id, year_month)`. This only tracks *earning*, not spending —
+buying a pencil doesn't shrink the class's pizza-party progress.
+
 ## What's real vs. simplified
 
 This is a working prototype, not the full competition build — a few
@@ -173,6 +219,62 @@ Roughly in order of "most value for least effort":
 5. **Grading UI polish** — right now teacher grading is a bare `<select>`
    per submission. A real "needs revision" flow would notify the student
    and let them resubmit.
+
+## Deploying (getting a public URL)
+
+This app needs a host that keeps a process running continuously — not a
+static-site host like Netlify or Vercel's default mode, since login
+sessions live in memory and the database is a file on disk (see "What's
+real vs. simplified" above). Render is used below since it needs zero
+code changes, but Railway and Fly.io work the same way. **Check each
+platform's current pricing before committing — free-tier terms change
+often.**
+
+### Steps
+
+1. **Push this project to a GitHub repo** (Render deploys from Git, it
+   doesn't take a raw zip upload):
+   ```bash
+   cd balance-app
+   git init
+   git add .
+   git commit -m "Initial commit"
+   ```
+   Then create an empty repo on github.com and follow the "push an
+   existing repository" instructions it shows you.
+
+2. **Create a Render account** at render.com (or Railway, at
+   railway.app) — this is the one part that has to be you, since it's
+   tied to your email/billing.
+
+3. **New → Web Service → connect your GitHub repo.** Render should
+   detect `render.yaml` in this project and pre-fill the settings
+   (start command `node server.js`, no build step). If it doesn't
+   pick up the blueprint automatically, set those two fields by hand.
+
+4. **Deploy.** You'll get a URL like `https://balance-app-xxxx.onrender.com`
+   — that's the real, public, shareable link. Give it a minute on first
+   deploy.
+
+5. **Test it exactly like you did locally** — register a student and a
+   teacher account, submit homework, check the wallet updates.
+
+### The persistence caveat, concretely
+
+On Render's free plan, `data/balance.db` gets reset whenever the service
+redeploys or restarts (free services also spin down after ~15 min idle,
+adding a cold-start delay on the next visit — separate from data loss,
+just slower). Two real ways to fix this:
+
+- **Pay for a persistent disk** — switch `plan: free` to `plan: starter`
+  in `render.yaml` and uncomment the `disk` block. Check Render's current
+  per-GB disk pricing before doing this.
+- **Move off a file-based database entirely** — swap `node:sqlite` for a
+  hosted Postgres (Render, Railway, and Supabase all offer one). This is
+  a real code change, not a config flag — `db.js` and every
+  `db.prepare(...).run/get/all(...)` call would need to move to an async
+  Postgres client. I can do this migration if you want genuinely durable
+  data rather than a demo that resets periodically — just say so.
 
 ## Project layout
 

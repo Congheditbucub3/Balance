@@ -21,6 +21,21 @@ function previewRole() {
 }
 emailInput.addEventListener('input', previewRole);
 
+// Populate the class dropdown from the server so it always reflects
+// whatever classes actually exist, rather than being hardcoded in HTML.
+(async function loadClasses() {
+  const classSelect = document.getElementById('regClass');
+  try {
+    const res = await fetch('/api/classes');
+    const data = await res.json();
+    classSelect.innerHTML =
+      '<option value="" disabled selected>Chọn lớp…</option>' +
+      data.classes.map((c) => `<option value="${c.class_id}">${c.name}</option>`).join('');
+  } catch (err) {
+    classSelect.innerHTML = '<option value="" disabled selected>Không tải được danh sách lớp</option>';
+  }
+})();
+
 document.getElementById('registerForm').addEventListener('submit', async function (e) {
   e.preventDefault();
   errorEl.style.display = 'none';
@@ -28,12 +43,13 @@ document.getElementById('registerForm').addEventListener('submit', async functio
   const name = document.getElementById('regName').value.trim();
   const email = document.getElementById('regEmail').value.trim();
   const password = document.getElementById('regPassword').value;
+  const class_id = document.getElementById('regClass').value;
 
   try {
     const res = await fetch('/api/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, password, class_id }),
     });
     const data = await res.json();
     if (!res.ok) {

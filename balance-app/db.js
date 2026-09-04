@@ -1,8 +1,18 @@
 // db.js — schema + connection, built on Node's native `node:sqlite` (no npm install required)
 const { DatabaseSync } = require('node:sqlite');
+const fs = require('node:fs');
 const path = require('node:path');
 
-const DB_PATH = path.join(__dirname, 'data', 'balance.db');
+const DATA_DIR = path.join(__dirname, 'data');
+const DB_PATH = path.join(DATA_DIR, 'balance.db');
+
+// SQLite will NOT create a missing parent directory for you — it just
+// throws "unable to open database file". The data/ folder is normally
+// present via data/.gitkeep, but that's a fragile thing to depend on (lost
+// in some zip/unzip round-trips, some GitHub upload flows, etc.), so this
+// makes the app self-heal regardless of how it got deployed.
+fs.mkdirSync(DATA_DIR, { recursive: true });
+
 const db = new DatabaseSync(DB_PATH);
 
 db.exec(`
@@ -60,6 +70,28 @@ db.exec(`
     student_id  INTEGER PRIMARY KEY REFERENCES users(user_id),
     last_seen    TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS classes (
+    class_id    INTEGER PRIMARY KEY AUTOINCREMENT,
+    name        TEXT UNIQUE NOT NULL,
+    created_at  TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS purchases (
+    purchase_id  INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id    INTEGER NOT NULL REFERENCES users(user_id),
+    item_id        TEXT NOT NULL,
+    item_name      TEXT NOT NULL,
+    item_cost      INTEGER NOT NULL,
+    purchased_at   TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS class_monthly_credits (
+    class_id       INTEGER NOT NULL REFERENCES classes(class_id),
+    year_month      TEXT NOT NULL,
+    total_credits    INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (class_id, year_month)
+  );
 `);
 
 // --- Lightweight migrations -------------------------------------------
@@ -80,6 +112,27 @@ function ensureColumn(table, column, definition) {
 // hit) — this one keeps counting every real session, capped or not, so
 // students can see their total study effort, not just their credited days.
 ensureColumn('daily_wellness', 'sessions_completed', 'INTEGER NOT NULL DEFAULT 0');
+
+// Which class a user belongs to (student) or manages (teacher). Nullable so
+// accounts created before this feature existed don't break — the UI treats
+// a null class_id as "no class assigned" rather than crashing.
+ensureColumn('users', 'class_id', 'INTEGER REFERENCES classes(class_id)');
+
+// Lifetime credits ever earned — unlike wallets.balance (spendable, and
+// wiped by shop purchases) or daily_earned_credits (resets every day),
+// this number only ever goes up. It's what the Profile page shows as
+// "total credits gained since the beginning."
+ensureColumn('wallets', 'lifetime_earned', 'INTEGER NOT NULL DEFAULT 0');
+
+// Seed a starter set of classes so the registration dropdown isn't empty
+// on a fresh install. Only runs once — if any class already exists
+// (including ones a teacher renamed or added), this is a no-op.
+const classCount = db.prepare('SELECT COUNT(*) AS n FROM classes').get().n;
+if (classCount === 0) {
+  const insertClass = db.prepare('INSERT INTO classes (name, created_at) VALUES (?, ?)');
+  const now = new Date().toISOString();
+  ['10A', '10B', '11A', '11B', '12A'].forEach((name) => insertClass.run(name, now));
+}
 
 module.exports = db;
 

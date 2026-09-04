@@ -37,22 +37,37 @@ async function requireAuth() {
 }
 
 function renderNav(user, offline) {
+  renderSidebar(user);
+
   const nav = document.createElement('div');
   nav.id = 'balanceNav';
   nav.className = 'balance-nav';
 
   const left = document.createElement('div');
-  left.innerHTML = `
+  left.style.display = 'flex';
+  left.style.alignItems = 'center';
+  left.style.gap = '4px';
+
+  const menuBtn = document.createElement('button');
+  menuBtn.className = 'menu-btn';
+  menuBtn.setAttribute('aria-label', 'Open menu');
+  menuBtn.innerHTML = '☰';
+  menuBtn.onclick = () => toggleSidebar(true);
+  left.appendChild(menuBtn);
+
+  const brandWrap = document.createElement('div');
+  brandWrap.innerHTML = `
     <a href="dashboard.html" class="brand">
       <span class="dot-logo"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span>
       Balance
     </a>
-    <span class="name name-role">${escapeHtml(user.name)} · ${user.role}</span>
+    <span class="name name-role">${escapeHtml(user.name)} · ${user.role}${user.class_name ? ' · ' + escapeHtml(user.class_name) : ''}</span>
     ${offline ? '<span class="offline-flag">offline — cached session</span>' : ''}
   `;
-  left.style.display = 'flex';
-  left.style.alignItems = 'center';
-  left.style.gap = '4px';
+  brandWrap.style.display = 'flex';
+  brandWrap.style.alignItems = 'center';
+  brandWrap.style.gap = '4px';
+  left.appendChild(brandWrap);
 
   const right = document.createElement('div');
   right.className = 'right';
@@ -83,6 +98,65 @@ function renderNav(user, offline) {
   nav.appendChild(right);
   document.body.prepend(nav);
   document.body.classList.add('has-balance-nav');
+}
+
+// The sidebar is the same three links (Home / Profile / Shop) on every
+// authenticated page — built once here in the shared nav module so every
+// page that includes app.js gets it automatically, rather than each page
+// re-implementing its own copy.
+function renderSidebar(user) {
+  const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
+
+  const backdrop = document.createElement('div');
+  backdrop.className = 'sidebar-backdrop';
+  backdrop.id = 'sidebarBackdrop';
+  backdrop.onclick = () => toggleSidebar(false);
+
+  const sidebar = document.createElement('div');
+  sidebar.className = 'sidebar';
+  sidebar.id = 'sidebarPanel';
+
+  const links = [
+    { href: 'dashboard.html', icon: '🏠', label: 'Home' },
+    { href: 'profile.html', icon: '👤', label: 'Profile' },
+  ];
+  // Spending only makes sense for students, but teachers can still see the
+  // catalog and the class's pizza-party progress (view-only — the buy
+  // endpoint itself is student-only regardless of what the UI shows).
+  links.push({ href: 'shop.html', icon: '🛒', label: 'Shop' });
+
+  sidebar.innerHTML = `
+    <button class="sidebar-close" id="sidebarCloseBtn" aria-label="Close menu">✕</button>
+    <div class="sidebar-brand">
+      <span class="dot-logo"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span>
+      Balance
+    </div>
+    ${links
+      .map(
+        (l) => `<a href="${l.href}" class="sidebar-link${currentPage === l.href ? ' active' : ''}">
+          <span class="icon">${l.icon}</span> ${l.label}
+        </a>`
+      )
+      .join('')}
+    <div class="sidebar-footer">${escapeHtml(user.name)}<br>${escapeHtml(user.class_name || 'No class assigned')}</div>
+  `;
+
+  document.body.appendChild(backdrop);
+  document.body.appendChild(sidebar);
+  document.getElementById('sidebarCloseBtn').onclick = () => toggleSidebar(false);
+
+  // Esc closes it too
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') toggleSidebar(false);
+  });
+}
+
+function toggleSidebar(open) {
+  const backdrop = document.getElementById('sidebarBackdrop');
+  const sidebar = document.getElementById('sidebarPanel');
+  if (!backdrop || !sidebar) return;
+  backdrop.classList.toggle('open', open);
+  sidebar.classList.toggle('open', open);
 }
 
 function escapeHtml(str) {

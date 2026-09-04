@@ -50,6 +50,11 @@ function normalizeWallet(wallet) {
 
 // Award `amount` credits, clamped by the remaining daily cap. Returns the
 // number of credits actually awarded (may be less than requested, or 0).
+// Every credit actually granted also (a) permanently bumps lifetime_earned,
+// which nothing ever resets or spends down — that's what Profile shows as
+// "total gained since the beginning" — and (b) adds to the student's
+// class's running monthly total, which the Shop page's pizza-party
+// progress bar reads.
 function awardCredits(studentId, amount, reason) {
   if (amount <= 0) return 0;
   const wallet = getOrCreateWallet(studentId);
@@ -57,10 +62,34 @@ function awardCredits(studentId, amount, reason) {
   const granted = Math.min(amount, room);
   if (granted > 0) {
     db.prepare(
-      `UPDATE wallets SET balance = balance + ?, daily_earned_credits = daily_earned_credits + ? WHERE student_id = ?`
-    ).run(granted, granted, studentId);
+      `UPDATE wallets SET balance = balance + ?, daily_earned_credits = daily_earned_credits + ?, lifetime_earned = lifetime_earned + ? WHERE student_id = ?`
+    ).run(granted, granted, granted, studentId);
+    addToClassMonthlyPool(studentId, granted);
   }
   return granted;
 }
 
-module.exports = { getOrCreateWallet, awardCredits, DAILY_CAP, todayStr };
+function addToClassMonthlyPool(studentId, amount) {
+  if (amount <= 0) return;
+  const user = db.prepare('SELECT class_id FROM users WHERE user_id = ?').get(studentId);
+  if (!user || !user.class_id) return; // no class assigned — nothing to credit
+  const ym = monthStr();
+  const existing = db
+    .prepare('SELECT 1 FROM class_monthly_credits WHERE class_id = ? AND year_month = ?')
+    .get(user.class_id, ym);
+  if (existing) {
+    db.prepare('UPDATE class_monthly_credits SET total_credits = total_credits + ? WHERE class_id = ? AND year_month = ?').run(
+      amount,
+      user.class_id,
+      ym
+    );
+  } else {
+    db.prepare('INSERT INTO class_monthly_credits (class_id, year_month, total_credits) VALUES (?, ?, ?)').run(
+      user.class_id,
+      ym,
+      amount
+    );
+  }
+}
+
+module.exports = { getOrCreateWallet, awardCredits, DAILY_CAP, todayStr, monthStr };

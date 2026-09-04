@@ -5,7 +5,7 @@ const { sendJson, setCookie, clearCookie } = require('../lib/http-helpers');
 const { getOrCreateWallet, todayStr } = require('../lib/credits');
 
 function register(body, req, res) {
-  const { name, email, password } = body;
+  const { name, email, password, class_id } = body;
   if (!name || !email || !password) {
     return sendJson(res, 400, { error: 'name, email and password are required' });
   }
@@ -18,9 +18,16 @@ function register(body, req, res) {
   const existing = db.prepare('SELECT user_id FROM users WHERE email = ?').get(email.toLowerCase());
   if (existing) return sendJson(res, 409, { error: 'An account with that email already exists' });
 
+  let classId = null;
+  if (class_id !== undefined && class_id !== null && class_id !== '') {
+    const cls = db.prepare('SELECT class_id FROM classes WHERE class_id = ?').get(Number(class_id));
+    if (!cls) return sendJson(res, 400, { error: 'Selected class does not exist' });
+    classId = cls.class_id;
+  }
+
   const info = db
-    .prepare(`INSERT INTO users (email, name, password_hash, role, created_at) VALUES (?, ?, ?, ?, ?)`)
-    .run(email.toLowerCase(), name, hashPassword(password), role, new Date().toISOString());
+    .prepare(`INSERT INTO users (email, name, password_hash, role, class_id, created_at) VALUES (?, ?, ?, ?, ?, ?)`)
+    .run(email.toLowerCase(), name, hashPassword(password), role, classId, new Date().toISOString());
 
   const user = db.prepare('SELECT * FROM users WHERE user_id = ?').get(info.lastInsertRowid);
   if (role === 'student') getOrCreateWallet(user.user_id);
@@ -55,7 +62,7 @@ function me(body, req, res, ctx) {
   const out = publicUser(user);
   if (user.role === 'student') {
     const wallet = getOrCreateWallet(user.user_id);
-    out.wallet = { balance: wallet.balance, daily_earned_credits: wallet.daily_earned_credits };
+    out.wallet = { balance: wallet.balance, daily_earned_credits: wallet.daily_earned_credits, lifetime_earned: wallet.lifetime_earned };
     const today = db
       .prepare('SELECT step_count FROM daily_wellness WHERE student_id = ? AND log_date = ?')
       .get(user.user_id, todayStr());
@@ -65,7 +72,15 @@ function me(body, req, res, ctx) {
 }
 
 function publicUser(user) {
-  return { user_id: user.user_id, email: user.email, name: user.name, role: user.role };
+  const cls = user.class_id ? db.prepare('SELECT name FROM classes WHERE class_id = ?').get(user.class_id) : null;
+  return {
+    user_id: user.user_id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    class_id: user.class_id || null,
+    class_name: cls ? cls.name : null,
+  };
 }
 
 module.exports = { register, login, logout, me };

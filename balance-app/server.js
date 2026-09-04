@@ -12,6 +12,9 @@ const walletRoutes = require('./routes/wallet');
 const assignmentRoutes = require('./routes/assignments');
 const teacherRoutes = require('./routes/teacher');
 const statsRoutes = require('./routes/stats');
+const classRoutes = require('./routes/classes');
+const profileRoutes = require('./routes/profile');
+const shopRoutes = require('./routes/shop');
 
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const PORT = process.env.PORT || 3000;
@@ -43,6 +46,14 @@ const routes = [
   ['GET', '/api/teacher/wellness-summary', teacherRoutes.wellnessSummary],
 
   ['GET', '/api/stats/progress', statsRoutes.studentProgress],
+
+  ['GET', '/api/classes', classRoutes.listClasses],
+
+  ['GET', '/api/profile', profileRoutes.getProfile],
+
+  ['GET', '/api/shop/catalog', shopRoutes.getCatalog],
+  ['GET', '/api/shop/progress', shopRoutes.getClassProgress],
+  ['POST', '/api/shop/buy', shopRoutes.buyItem],
 ];
 
 function matchRoute(method, urlPath) {
